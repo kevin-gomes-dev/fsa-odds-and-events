@@ -53,6 +53,21 @@ function sortAll(arr) {
 }
 
 /**
+ * Sorts n numbers from array into odds or evens
+ * @param {number} n
+ * @param {number[]} arr
+ */
+function sortNTimes(n, arr) {
+  if (arr.length === 0) return;
+  // Either go to n or the arr length depending on what's smaller
+  n = Math.min(n, arr.length);
+  for (let i = 0; i < n; i++) {
+    sortOne(arr);
+  }
+  render();
+}
+
+/**
  * Create and return an HTML form with buttons Add number, Sort 1 and Sort all
  * Also adds event listeners to the form buttons
  * @returns {HTMLFormElement} The form
@@ -67,7 +82,7 @@ function bankForm() {
     <button>Add number</button>
     <button id = "sortOne">Sort 1</button>
     <button id = "sortAll">Sort All</button>
-    <button id = "randomNum">Add random</button>
+    <button id = "randomNum">Add Random</button>
   `;
 
   const sortOneButton = $form.querySelector("#sortOne");
@@ -84,6 +99,25 @@ function bankForm() {
   sortOneButton.addEventListener("click", () => sortOne(numbers));
   sortAllButton.addEventListener("click", () => sortAll(numbers));
   addRandomButton.addEventListener("click", () => addRandomNumber(numbers));
+  return $form;
+}
+
+/**
+ * Create and return an HTML form for sorting n amount of times
+ */
+function sortNTimesForm() {
+  const $form = document.createElement("form");
+  $form.innerHTML = `
+  <label> Amount of times to sort -->
+  <input name="sortN" type="number" />
+  </label>
+  <button>Execute Sort</button>
+  `;
+  $form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const numSort = Number(new FormData($form).get("sortN"));
+    sortNTimes(numSort, numbers);
+  });
   return $form;
 }
 
@@ -116,13 +150,16 @@ function render() {
   $app.innerHTML = `
     <h1>Odds and Even(t)s</h1>
     <form></form>
+    <form></form>
     <div id = "bank"></div>
     <div id = "odds"></div>
     <div id = "evens"></div>
     `;
 
   // Replace app html with elements
-  $app.querySelector("form").replaceWith(bankForm());
+  const $forms = $app.querySelectorAll("form");
+  $forms[0].replaceWith(bankForm());
+  $forms[1].replaceWith(sortNTimesForm());
   $app.querySelector("#bank").replaceWith(createArrayDiv("Bank", "bank", numbers));
   $app.querySelector("#odds").replaceWith(createArrayDiv("Odds", "odds", odds));
   $app.querySelector("#evens").replaceWith(createArrayDiv("Evens", "evens", evens));
