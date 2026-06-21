@@ -32,11 +32,10 @@ function addRandomNumber(arr) {
  * @param {number[]} arr
  */
 function sortOne(arr) {
-  if (arr.length > 0) {
-    const elem = arr.shift();
-    elem % 2 === 0 ? evens.unshift(elem) : odds.unshift(elem);
-    render();
-  }
+  if (arr.length === 0) return;
+  const elem = arr.shift();
+  elem % 2 === 0 ? evens.unshift(elem) : odds.unshift(elem);
+  render();
 }
 
 /**
@@ -58,7 +57,7 @@ function sortAll(arr) {
  * @param {number[]} arr
  */
 function sortNTimes(n, arr) {
-  if (arr.length === 0) return;
+  if (arr.length === 0 || n <= 0) return;
   // Either go to n or the arr length depending on what's smaller
   n = Math.min(n, arr.length);
   for (let i = 0; i < n; i++) {
@@ -68,17 +67,34 @@ function sortNTimes(n, arr) {
 }
 
 /**
+ * Sort all arrays given in either Ascending or Descending order
+ * @param {...number[]} arrays Array containing arrays of numbers
+ * @param {string} direction Which direction, "ascending" or anything else (for descend)
+ */
+function sortArrays(direction, ...arrays) {
+  // Don't render if nothing to sort, if at least 1 array was sorted, render
+  let bool = false;
+  for (const arr of arrays) {
+    if (arr.length > 1) {
+      direction.toLowerCase() === "ascending" ? arr.sort((a, b) => a - b) : arr.sort((a, b) => b - a);
+      bool = true;
+    }
+  }
+  if (bool) render();
+}
+
+/**
  * Create and return an HTML form with buttons Add number, Sort 1 and Sort all
  * Also adds event listeners to the form buttons
+ * @param {number[]} numbers The array for numbers
  * @returns {HTMLFormElement} The form
  */
-function bankForm() {
+function bankForm(numbers) {
   const $form = document.createElement("form");
   $form.innerHTML = `
     <label>
-      Add any number to the number bank -->
+      Add any number to the number bank --></label>
       <input name="addNumber" type="number" />
-    </label>
     <button>Add number</button>
     <button id = "sortOne">Sort 1</button>
     <button id = "sortAll">Sort All</button>
@@ -92,8 +108,8 @@ function bankForm() {
   // Add number
   $form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const data = new FormData($form);
-    addNumber(data.get("addNumber"), numbers);
+    const n = Number(new FormData($form).get("addNumber"));
+    addNumber(n, numbers);
   });
 
   sortOneButton.addEventListener("click", () => sortOne(numbers));
@@ -104,19 +120,47 @@ function bankForm() {
 
 /**
  * Create and return an HTML form for sorting n amount of times
+ * @param {number[]} numbers
  */
-function sortNTimesForm() {
+function sortNTimesForm(numbers) {
   const $form = document.createElement("form");
   $form.innerHTML = `
-  <label> Amount of times to sort -->
+  <label> Amount of times to sort --></label>
   <input name="sortN" type="number" />
-  </label>
   <button>Execute Sort</button>
   `;
   $form.addEventListener("submit", (event) => {
     event.preventDefault();
     const numSort = Number(new FormData($form).get("sortN"));
     sortNTimes(numSort, numbers);
+  });
+  return $form;
+}
+
+/**
+ * Create form with dropdown for sorting ascending or descending
+ * @param {number[]} numbers
+ */
+function sortDropdownForm(numbers) {
+  const $form = document.createElement("form");
+  const $select = document.createElement("select");
+  $select.name = "sortDirection";
+  $select.innerHTML = `
+  <option value = 'Ascending'>Ascending</option>
+  <option value = 'Descending'>Descending</option>
+  `;
+  $form.innerHTML = `
+  <label>Perform actual sort --></label>
+  <select></select>
+  <input type='submit' value='Sort'/>
+  `;
+  $form.querySelector("select").replaceWith($select);
+  $form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const selection = $select.value;
+    selection === "Ascending"
+      ? sortArrays("Ascending", numbers, odds, evens)
+      : sortArrays("Descending", numbers, odds, evens);
   });
   return $form;
 }
@@ -151,6 +195,7 @@ function render() {
     <h1>Odds and Even(t)s</h1>
     <form></form>
     <form></form>
+    <form></form>
     <div id = "bank"></div>
     <div id = "odds"></div>
     <div id = "evens"></div>
@@ -158,8 +203,9 @@ function render() {
 
   // Replace app html with elements
   const $forms = $app.querySelectorAll("form");
-  $forms[0].replaceWith(bankForm());
-  $forms[1].replaceWith(sortNTimesForm());
+  $forms[0].replaceWith(bankForm(numbers));
+  $forms[1].replaceWith(sortNTimesForm(numbers));
+  $forms[2].replaceWith(sortDropdownForm(numbers));
   $app.querySelector("#bank").replaceWith(createArrayDiv("Bank", "bank", numbers));
   $app.querySelector("#odds").replaceWith(createArrayDiv("Odds", "odds", odds));
   $app.querySelector("#evens").replaceWith(createArrayDiv("Evens", "evens", evens));
