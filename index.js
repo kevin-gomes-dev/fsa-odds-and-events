@@ -19,6 +19,14 @@ function addNumber(n, arr) {
 }
 
 /**
+ * Adds a random number to array between -1,000,000 (incl) and 1,000,000 (ex)
+ * @param {number[]} arr
+ */
+function addRandomNumber(arr) {
+  addNumber(Math.floor(Math.random() * (1000000 - -1000000) + -1000000), arr);
+}
+
+/**
  * Sorts a number from given array, unshifting into resspective odd/even array
  * Possibly calls a render
  * @param {number[]} arr
@@ -59,10 +67,12 @@ function bankForm() {
     <button>Add number</button>
     <button id = "sortOne">Sort 1</button>
     <button id = "sortAll">Sort All</button>
+    <button id = "randomNum">Add random</button>
   `;
 
   const sortOneButton = $form.querySelector("#sortOne");
   const sortAllButton = $form.querySelector("#sortAll");
+  const addRandomButton = $form.querySelector("#randomNum");
 
   // Add number
   $form.addEventListener("submit", (event) => {
@@ -71,11 +81,9 @@ function bankForm() {
     addNumber(data.get("addNumber"), numbers);
   });
 
-  // Sort 1
   sortOneButton.addEventListener("click", () => sortOne(numbers));
-
-  // Sort all
   sortAllButton.addEventListener("click", () => sortAll(numbers));
+  addRandomButton.addEventListener("click", () => addRandomNumber(numbers));
   return $form;
 }
 
