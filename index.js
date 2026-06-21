@@ -94,7 +94,7 @@ function bankForm(numbers) {
   $form.innerHTML = `
     <label>
       Add any number to the number bank --></label>
-      <input name="addNumber" type="number" />
+      <input name="addNumber" type="strinig" />
     <button>Add number</button>
     <button id = "sortOne">Sort 1</button>
     <button id = "sortAll">Sort All</button>
@@ -108,8 +108,8 @@ function bankForm(numbers) {
   // Add number
   $form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const n = Number(new FormData($form).get("addNumber"));
-    addNumber(n, numbers);
+    const numbersToAdd = new FormData($form).get("addNumber").split(",");
+    for (const n of numbersToAdd) addNumber(Number(n), numbers);
   });
 
   sortOneButton.addEventListener("click", () => sortOne(numbers));
